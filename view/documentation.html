@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>305cde Assignment&mdash; Lam Hoi Shan </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Hong Kong Food & Place Introduction" />
+
+	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+	<link rel="shortcut icon" href="favicon.ico">
+
+	<!-- <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'> -->
+
+	<!-- Animate.css -->
+	<link rel="stylesheet" href="css/animate.css">
+	<!-- Icomoon Icon Fonts-->
+	<link rel="stylesheet" href="css/icomoon.css">
+	<!-- Bootstrap  -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+
+	<link rel="stylesheet" href="css/style.css">
+
+
+	<!-- Modernizr JS -->
+	<script src="js/modernizr-2.6.2.min.js"></script>
+	<!-- FOR IE9 below -->
+	<!--[if lt IE 9]>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
+
+</head>
+<body>
+<header>
+	<div class="container text-center">
+		<div class="jumper-navbar-brand">
+			<a class="jumper-logo" href="index.html">Jumper</a>
+		</div>
+		<nav id="jumper-main-nav" role="navigation">
+			<ul>
+				<li><a href="index.html">Home</a></li>
+				<li><a href="blog.html">Blogs</a></li>
+				<li><a href="about.html">About</a></li>
+				<li><a href="contact.html">Contact</a></li>
+				<li><a href="signup.html">Signup/Login</a></li>
+        <li><a href="Documentation.html" class="active">Documentation</a></li>
+				<li><a href="apiendpoint.html">API EndPoint</a></li>
+			</ul>
+		</nav>
+	</div>
+</header>
+
+  <body><section class="projects section">
+    <div class="section-inner col-lg-12">
+        <div class="content apiBox" style="background: #EEE;">
+          <h3 class="heading">CONFIG JS</h3>
+          <font size="4" style=""><p>The server and database configuration</p></font>
+          <pre>
+            module.exports = {
+    web: {
+        host: 'localhost',
+        port: 8080
+    },
+    mongo: {
+        url: 'localhost',
+        port: 27017,
+        database: 'user'
+    }
+};
+          </pre>
+          <hr>
+          <h3 class="heading">Server.js</h3>
+          <font size="4" style=""><p>The server</p></font>
+          <pre>'use strict';
+
+const Hapi = require('hapi');
+const Good = require('good');
+const Inert = require('inert');
+const Yar = require('yar');
+
+var config = require('./config');
+
+const server = new Hapi.Server();
+server.connection({ port: config.web.port, host: config.web.host });
+server.route(require('./api/account'));
+
+require('./api/mongo').setup(server);
+
+server.register([
+	{
+		register: Good,
+		options: {
+			reporters: {
+				console: [
+					{
+						module: 'good-squeeze',
+						name: 'Squeeze',
+						args: [
+							{
+								response: '*',
+								log: '*'
+							}
+						]
+					},
+					{
+						module: 'good-console'
+					},
+					'stdout'
+				]
+			}
+		}
+	},
+	{ register: Inert },
+	{
+		register: Yar,
+		options: {
+			storeBlank: false,
+			cookieOptions: {
+				password: 'the-password-must-be-at-least-32-characters-long',
+				isSecure: false,
+			}
+		}
+	}
+], (err) => {
+
+	if (err) {
+		throw err; // something bad happened loading the plugin
+	}
+
+	// index page
+	server.route({
+		method: 'GET',
+		path: '/',
+		handler: function (request, reply) {
+			reply.file('view/index.html');
+		}
+	});
+
+	// view folder
+	server.route({
+		method: 'GET',
+		path: '/{param*}',
+		handler: {
+			directory: {
+				path: 'view'
+			}
+		}
+	});
+
+	server.start((err) => {
+
+		if (err) {
+			throw err;
+		}
+		server.log('info', 'Server running at: ' + server.info.uri);
+	});
+});
+          </pre>
+          <hr>
+          <h3 class="heading">Mongo JS</h3>
+            <font size="4" style=""><p>The database</p></font>
+          <pre>var Mongoose = require('mongoose');
+var passportLocalMongoose = require('passport-local-mongoose');
+var config = require('../config');
+
+var server = null;
+exports.setup = function(hapiServer){
+    server = hapiServer;
+};
+
+Mongoose.connect('mongodb://' + config.mongo.url + ':' + config.mongo.port + '/' + config.mongo.database);
+var db = Mongoose.connection;
+
+db.on('error', function(err){
+    server.log('error', err);
+});
+db.once('open', function () {
+    server.log('info', 'Connection with database succeeded.');
+});
+
+// mongo database for account
+var AccountSchema = new Mongoose.Schema({
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+});
+AccountSchema.plugin(passportLocalMongoose, {
+    usernameField: 'email',
+    hashField: 'password',
+    usernameLowerCase: true,
+});
+
+var Account = Mongoose.model('Account', AccountSchema, 'Account');
+exports.Account = Account;
+          </pre>
+          <hr>
+
+          <h3 class="heading">Account JS</h3>
+          <pre>
+            var Joi = require('joi');
+var Mongo = require('./mongo');
+var Account = Mongo.Account;
+
+module.exports = [
+    {
+        method: 'POST',
+        path: '/api/account/register',
+        config: {
+            validate: {
+                payload: {
+                    firstName: Joi.string().required(),
+                    lastName: Joi.string().required(),
+                    email: Joi.string().email().required(),
+                    password: Joi.string().required()
+                }
+            }
+        },
+        handler: function (request, reply) {
+            var newAccount = new Account({
+                firstName: request.payload.firstName,
+                lastName: request.payload.lastName,
+                email: request.payload.email,
+            });
+            Account.findOne({ email: request.payload.email }, function(err, account){
+                if(err){
+                    server.log('error', err);
+                    reply({ success: false, error: err.message });
+                }else if(account){
+                    reply({ success: false, error: 'Email is already registered.' });
+                }else{
+                    Account.register(newAccount, request.payload.password, function (err, account) {
+                        if (err) {
+                            server.log('error', err);
+                            reply({ success: false, error: err.message });
+                        } else {
+                            request.yar.set('account', account);
+                            reply({ success: true, account: account });
+                        }
+                    });
+                }
+            })
+        }
+    },
+    {
+        method: 'POST',
+        path: '/api/account/login',
+        config: {
+            validate: {
+                payload: {
+                    email: Joi.string().email().required(),
+                    password: Joi.string().required()
+                }
+            }
+        },
+        handler: function (request, reply) {
+            Account.authenticate()(request.payload.email, request.payload.password, function (err, account, passwordError) {
+                if (err) {
+                    server.log('error', err);
+                    reply({ success: false, error: err.message });
+                } else {
+                    if (passwordError) {
+                        reply({ success: false, error: passwordError.message });
+
+                    } else if (account) {
+                        request.yar.set('account', account);
+                        reply({ success: true, account: account });
+                    }
+                }
+            });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/api/account/logout',
+        handler: function (request, reply) {
+            request.yar.set('account', null);
+            reply({ success: true });
+        }
+    },
+    {
+        method: 'GET',
+        path: '/api/account/info',
+        handler: function (request, reply) {
+            var account = request.yar.get('account');
+            if (account) {
+                reply({ success: true, account: account });
+            } else {
+                reply({ success: false, account: null });
+            }
+        }
+    }
+    /*
+{
+        method: 'POST',
+        path: '/api/account/Change-password',
+        handler: function (request, reply) {
+          var account = request.yar,get('account');
+          Account.findOne({ email: request.payload.email }, function(err, account){
+            if (err) {
+              server.log('error', err);
+              reply({ success: false, error: err.message });
+            } else {
+              Account.password = request.payload.newPassword || Account.password;
+              Account.save(function (err, account) {
+                reply("Hello World");
+                //reply({ success:true, account:account.withoutPassword()});
+              });
+            }
+          });
+        }*/
+];
+          </pre>
+</div><!--//section-inner-->
+
+<footer>
+  <div id="footer" class="jumper-border-line">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2 text-center">
+          <p>Copyright 2017 <a href="#">Jumper</a>. All Rights Reserved.</p>
+          <p class="jumper-social-icons">
+            <a href="https://twitter.com/Jumperhk1"><i class="icon-twitter-with-circle"></i></a>
+            <a href=""><i class="icon-facebook-with-circle"></i></a>
+            <a href="https://www.instagram.com/jumperhk/"><i class="icon-instagram-with-circle"></i></a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+</div></section></body></html>

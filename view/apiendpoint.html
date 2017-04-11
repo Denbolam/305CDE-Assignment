@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>305cde Assignment&mdash; Lam Hoi Shan </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Hong Kong Food & Place Introduction" />
+
+	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+	<link rel="shortcut icon" href="favicon.ico">
+
+	<!-- <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'> -->
+
+	<!-- Animate.css -->
+	<link rel="stylesheet" href="css/animate.css">
+	<!-- Icomoon Icon Fonts-->
+	<link rel="stylesheet" href="css/icomoon.css">
+	<!-- Bootstrap  -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+
+	<link rel="stylesheet" href="css/style.css">
+
+
+	<!-- Modernizr JS -->
+	<script src="js/modernizr-2.6.2.min.js"></script>
+	<!-- FOR IE9 below -->
+	<!--[if lt IE 9]>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
+
+</head>
+<body>
+<header>
+	<div class="container text-center">
+		<div class="jumper-navbar-brand">
+			<a class="jumper-logo" href="index.html">Jumper</a>
+		</div>
+		<nav id="jumper-main-nav" role="navigation">
+			<ul>
+				<li><a href="index.html">Home</a></li>
+				<li><a href="blog.html">Blogs</a></li>
+				<li><a href="about.html">About</a></li>
+				<li><a href="contact.html">Contact</a></li>
+				<li><a href="signup.html">Signup/Login</a></li>
+        <li><a href="Documentation.html">Documentation</a></li>
+        <li><a href="apiendpoint.html" class="active">API EndPoint</a></li>
+			</ul>
+		</nav>
+	</div>
+</header>
+
+  <body><section class="projects section">
+    <div class="section-inner col-lg-12">
+        <div class="content apiBox" style="background: #EEE;">
+          <h1> API Endpoints</h1>
+          <h3 class="heading">User Login</h3>
+          <pre>
+            URI       https://localhost:8080/signup.html
+            Method	  POST
+            Data	  {
+                      "email": "abc@yahoo.com",
+                      "password": "123456"
+            }
+            Result	{
+                "firstname": "abc",
+                "lastname": "ddd",
+                "email": "abc@yahoo.com",
+                "password": "123456",
+            }
+            Error	{
+                "login": "fail"
+            }
+          </pre>
+          <hr>
+          <h3 class="heading">User Registration</h3>
+          <pre>
+            URI  https://localhost:8080/signup.html
+            Method	  POST
+            Data	  {
+              "firstname": "abc",
+              "lastname": "ddd",
+              "email": "abc@yahoo.com",
+              "password": "123456",
+            }
+            Result	{
+            "Reg": "OK"
+            }
+            Error	{
+            "Reg": "FAIL"
+            }
+          </pre>
+          <hr>
+
+</div><!--//section-inner-->
+
+<footer>
+  <div id="footer" class="jumper-border-line">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2 text-center">
+          <p>Copyright 2017 <a href="#">Jumper</a>. All Rights Reserved.</p>
+          <p class="jumper-social-icons">
+            <a href="https://twitter.com/Jumperhk1"><i class="icon-twitter-with-circle"></i></a>
+            <a href=""><i class="icon-facebook-with-circle"></i></a>
+            <a href="https://www.instagram.com/jumperhk/"><i class="icon-instagram-with-circle"></i></a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+</div></section></body></html>
